@@ -1,31 +1,81 @@
 pipeline {
 	agent {
-			//TODO add agent from dockerfile
+	//filename 'Dockerfile' not needed since name is already the default one
+			dir "training-playground-merges-repo3"
 		}
   	}
   	
   	options { 
   		//TODO add option to avoid concurrent builds
+		disableConcurrentBuilds()
 	}
 
 
 	environment {
-		CONFIGS = '{JSON_TREE_OBJECT}' //TODO create json tree object
+		CONFIGS = '{\
+		repositoryConfigs:[\
+			{\
+				name:"training-playground-merges-repo1",\
+				urlWithoutProtocol:"github.com/bleachman2/training-playground-merges-repo1",\
+				credentialId:"nb24871_git"\
+			}\
+			{\
+				name:"training-playground-merges-repo2",\
+				urlWithoutProtocol:"github.com/bleachman2/training-playground-merges-repo2",\
+				credentialId:"nb24871_git"\
+			}\
+		],\
+		mergeConfigs:[\
+			{\
+			sourceRepository:"training-playground-merges-repo1",\
+				targetRepository:"training-playground-merges-repo2",\
+				oneToOneMapping:"main:main",\
+				oneToManyMapping:"",\
+				manyToManyMapping:""\
+			}\
+			{\				
+			sourceRepository:"training-playground-merges-repo2",\
+				targetRepository:"training-playground-merges-repo1",\
+				oneToOneMapping:"main:main",\
+				oneToManyMapping:"",\
+				manyToManyMapping:""\
+			}\
+			{\				
+			sourceRepository:"training-playground-merges-repo2",\
+				targetRepository:"training-playground-merges-repo2",\
+				oneToOneMapping:"sec:main",\
+				oneToManyMapping:"",\
+				manyToManyMapping:""\
+			}\
+		]/
+		}' //TODO create json tree object
 		
-		SEND_SUCCESS_EMAIL_TO = 'EMAIL'	//TODO EMAIL
+		SEND_SUCCESS_EMAIL_TO = 'nb24871@novabase.pt'	
 		SEND_SUCCESS_EMAIL_SUBJECT = 'Automatic merge results report'
-		SEND_SUCCESS_EMAIL_TEMPLATE_PATH = 'PATH_TO_success.html' //TODO PATH_TO
+		SEND_SUCCESS_EMAIL_TEMPLATE_PATH = 'email-templates/success.html' 
 
-		SEND_MAINTENANCE_EMAIL_TO = 'EMAIL'	//TODO EMAIL
+		SEND_MAINTENANCE_EMAIL_TO = 'nb24871@novabase.pt'	
 		SEND_MAINTENANCE_EMAIL_SUBJECT = 'Automatic merge results maintenance'
-		SEND_MAINTENANCE_EMAIL_TEMPLATE_PATH = 'PATH_TO_maintenance.html' //TODO PATH_TO
+		SEND_MAINTENANCE_EMAIL_TEMPLATE_PATH = 'email-templates/maintenace.html' 
   	}
 
   	stages {
     	stage('Setup Remotes') {
       		steps { 
       			script {
-      				//TODO Store initial state in init branch, if not exists create refs/heads/init - use - show-ref --quiet
+				sh 'if git show-ref --quiet refs/heads/init; then git branch -D init; fi'
+				sh 'git checkout -b init'
+				
+				def json_tree =readJSON tree: env.CONFIGS
+				json_tree.each{json_tree -> 
+
+				withCredentials([usernamePassword(credentialsId: json_tree.credentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+				
+				setupRemote(json_tree.name, json_tree.urlWithoutProtocol, env.USERNAME, env.PASSWORD)
+				}
+				
+				}
+      				
 					// TODO use readJSON to read CONFIGS to a local variable
 					// for each repositoryConfig object call setupRemote method with defined parameters already implemented
 					// use withCredentials to get password and user from jenkins
