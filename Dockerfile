@@ -1,5 +1,5 @@
 FROM alpine:3.8
-MAINTAINER TODO EMAIL_HERE
+MAINTAINER nb24871@novabase.pt
 
 RUN apk -U add git
-RUN git config --global user.email "TODO EMAIL_HERE" && git config --global user.name "TODO USERNAME_HERE"
+RUN git config --global user.email bleachman@live.com.pt && git config --global user.name Nelson
