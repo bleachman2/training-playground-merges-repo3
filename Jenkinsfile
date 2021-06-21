@@ -111,6 +111,7 @@ pipeline {
 	post { 
         success { 
   			script {
+				sh "echo hello world"
 			//TODO read mergeReport json file
 			// call success email with report data
   			}
