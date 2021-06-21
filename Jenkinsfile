@@ -350,7 +350,7 @@ def performMerges(sourceRepository = '', targetRepository = '', oneToOneMapping 
 	}
 	
 	//TODO trim oneToOneMapping variable by space ' ' and assign it to a variable  
-	def trimmedMapping=oneToManyMapping.trim().split(' ')
+	def trimmedMapping=oneToOneMapping.trim().split(' ')
 	def mergeReport = []	
 	
 	// TODO for each one to one mapping check if cointains ":", if so split it to get the source branch and the target branch
