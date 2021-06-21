@@ -1,7 +1,8 @@
 pipeline {
 	agent {
-	//filename 'Dockerfile' not needed since name is already the default one
-			dir "training-playground-merges-repo3"
+		dockerfile {dir "training-playground-merges-repo3"}
+		//filename 'Dockerfile' not needed since name is already the default one
+
 		}
 
   	
