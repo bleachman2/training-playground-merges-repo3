@@ -78,8 +78,8 @@ pipeline {
 					
 					json_configs.mergeConfigs.each {json_var ->
 						def oneToOne = json_var.oneToOneMapping
-						def oneToManyConverted = convertOneToManyIntoOneToOneMapping(targetRepository,oneToManyMapping)
-						def manyToManyConverted = convertManyToManyIntoOneToOneMapping(sourceRepository,manyToManyMapping)
+						def oneToManyConverted = convertOneToManyIntoOneToOneMapping(json_var.targetRepository,json_var.oneToManyMapping)
+						def manyToManyConverted = convertManyToManyIntoOneToOneMapping(json_var.sourceRepository,json_var.manyToManyMapping)
 						def allBranch = (oneToOne + " " + oneToManyConverted + " " + manyToManyConverted).replaceAll("  "," ").trim()
 						def res=performMerges(json_var.sourceRepository,json_var.targetRepository,allBranch)
 						if (res != null){mergeReport.addAll(res)}
