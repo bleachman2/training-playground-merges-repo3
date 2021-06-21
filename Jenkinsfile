@@ -33,21 +33,7 @@ pipeline {
 				oneToManyMapping:"",\
 				manyToManyMapping:""\
 			}\
-			//{\				
-			//sourceRepository:"training-playground-merges-repo2",\
-			//	targetRepository:"training-playground-merges-repo1",\
-			//	oneToOneMapping:"main:main",\
-			//	oneToManyMapping:"",\
-			//	manyToManyMapping:""\
-			//},\
-			//{\				
-			//sourceRepository:"training-playground-merges-repo2",\
-			//	targetRepository:"training-playground-merges-repo2",\
-			//	oneToOneMapping:"sec:main",\
-			//	oneToManyMapping:"",\
-			//	manyToManyMapping:""\
-			//}\
-		]/
+		]\
 		}''' //TODO create json tree object
 		
 		SEND_SUCCESS_EMAIL_TO = 'nb24871@novabase.pt'	
