@@ -53,7 +53,7 @@ pipeline {
 				sh 'if git show-ref --quiet refs/heads/init; then git branch -D init; fi'
 				sh 'git checkout -b init'
 				
-				def json_tree_conf =readJSON tree: env.CONFIGS
+				def json_tree_conf =readJSON text: env.CONFIGS
 				json_tree_conf.repositoryConfigs.each{json_tree ->
 
 				withCredentials([usernamePassword(credentialsId: json_tree.credentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -73,7 +73,7 @@ pipeline {
       		steps { 
       			script {
 				
-					def json_configs =readJSON(tree: env.CONFIGS)
+					def json_configs =readJSON text: env.CONFIGS
 					def mergeReport = []
 					
 					json_configs.mergeConfigs.each {json_var ->
