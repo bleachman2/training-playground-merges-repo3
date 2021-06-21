@@ -86,21 +86,23 @@ pipeline {
       		steps { 
       			script {
 				
-					def json_configs =readJSON tree: env.CONFIGS
+					def json_configs =readJSON(tree: env.CONFIGS)
+					def mergeReport = []
 					
 					json_configs.mergeConfigs.each {json_var ->
-					def oneToOne = json_var.oneToOneMapping
-					def oneToManyConverted = convertOneToManyIntoOneToOneMapping(targetRepository,oneToManyMapping)
-					def manyToManyConverted = convertManyToManyIntoOneToOneMapping(sourceRepository,manyToManyMapping)
-					def allBranch = (oneToOne + " " + oneToManyConverted + " " + manyToManyConverted).replaceAll("  "," ").trim()
-					def res=performMerges(json_var.sourceRepository,json_var.targetRepository,allBranch)
-								
+						def oneToOne = json_var.oneToOneMapping
+						def oneToManyConverted = convertOneToManyIntoOneToOneMapping(targetRepository,oneToManyMapping)
+						def manyToManyConverted = convertManyToManyIntoOneToOneMapping(sourceRepository,manyToManyMapping)
+						def allBranch = (oneToOne + " " + oneToManyConverted + " " + manyToManyConverted).replaceAll("  "," ").trim()
+						def res=performMerges(json_var.sourceRepository,json_var.targetRepository,allBranch)
+						if (res != null){mergeReport.addAll(res)}
 					
 					}
 					
 					
 					
-					def mergeReport = []
+
+
 					
       			    // TODO use readJSON to read CONFIGS to a local variable
 					// for each mergeConfig object assign oneToOneMapping to a variable and use convertOneToManyIntoOneToOneMapping 
@@ -113,6 +115,8 @@ pipeline {
 					
 					sh "git checkout init"
 					//TODO convert mergeReport using groovy.json.JsonOutput.toJson and write mergeReport to an json file
+					def margeReportJson = groovy.json.JsonOutput.toJson(mergeReport)
+					writeJson(file: 'margeReport.json', json: mergeReportJson)
       			}
       		}
     	}
@@ -367,7 +371,7 @@ def performMerges(sourceRepository = '', targetRepository = '', oneToOneMapping 
 			def splitedMapping=row.split(":")
 			def sourceBranch = splitedMapping[0]
 			def targetBranch = splitedMapping[1]
-			margeReport.add(mergeBranches(sourceRepository,sourceBranch,targetRepository,targetBranch))
+			mergeReport.add(mergeBranches(sourceRepository,sourceBranch,targetRepository,targetBranch))
 			}
 	}
 	// Then call mergeBranches with the requested parameters
