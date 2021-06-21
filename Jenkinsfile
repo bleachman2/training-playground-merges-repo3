@@ -18,7 +18,7 @@ pipeline {
 				name:"training-playground-merges-repo1",\
 				urlWithoutProtocol:"github.com/bleachman2/training-playground-merges-repo1",\
 				credentialId:"nb24871_git"\
-			}\
+			},\
 			{\
 				name:"training-playground-merges-repo2",\
 				urlWithoutProtocol:"github.com/bleachman2/training-playground-merges-repo2",\
@@ -33,20 +33,20 @@ pipeline {
 				oneToManyMapping:"",\
 				manyToManyMapping:""\
 			}\
-			{\				
-			sourceRepository:"training-playground-merges-repo2",\
-				targetRepository:"training-playground-merges-repo1",\
-				oneToOneMapping:"main:main",\
-				oneToManyMapping:"",\
-				manyToManyMapping:""\
-			}\
-			{\				
-			sourceRepository:"training-playground-merges-repo2",\
-				targetRepository:"training-playground-merges-repo2",\
-				oneToOneMapping:"sec:main",\
-				oneToManyMapping:"",\
-				manyToManyMapping:""\
-			}\
+			//{\				
+			//sourceRepository:"training-playground-merges-repo2",\
+			//	targetRepository:"training-playground-merges-repo1",\
+			//	oneToOneMapping:"main:main",\
+			//	oneToManyMapping:"",\
+			//	manyToManyMapping:""\
+			//},\
+			//{\				
+			//sourceRepository:"training-playground-merges-repo2",\
+			//	targetRepository:"training-playground-merges-repo2",\
+			//	oneToOneMapping:"sec:main",\
+			//	oneToManyMapping:"",\
+			//	manyToManyMapping:""\
+			//}\
 		]/
 		}''' //TODO create json tree object
 		
