@@ -3,7 +3,7 @@ pipeline {
 	//filename 'Dockerfile' not needed since name is already the default one
 			dir "training-playground-merges-repo3"
 		}
-  	}
+
   	
   	options { 
   		//TODO add option to avoid concurrent builds
@@ -12,7 +12,7 @@ pipeline {
 
 
 	environment {
-		CONFIGS = '{\
+		CONFIGS = '''{\
 		repositoryConfigs:[\
 			{\
 				name:"training-playground-merges-repo1",\
@@ -48,7 +48,7 @@ pipeline {
 				manyToManyMapping:""\
 			}\
 		]/
-		}' //TODO create json tree object
+		}''' //TODO create json tree object
 		
 		SEND_SUCCESS_EMAIL_TO = 'nb24871@novabase.pt'	
 		SEND_SUCCESS_EMAIL_SUBJECT = 'Automatic merge results report'
@@ -66,8 +66,8 @@ pipeline {
 				sh 'if git show-ref --quiet refs/heads/init; then git branch -D init; fi'
 				sh 'git checkout -b init'
 				
-				def json_tree =readJSON tree: env.CONFIGS
-				json_tree.each{json_tree -> 
+				def json_tree_conf =readJSON tree: env.CONFIGS
+				json_tree_conf.repositoryConfigs.each{json_tree ->
 
 				withCredentials([usernamePassword(credentialsId: json_tree.credentialId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 				
@@ -85,6 +85,21 @@ pipeline {
     	stage('Perform Merges') {
       		steps { 
       			script {
+				
+					def json_configs =readJSON tree: env.CONFIGS
+					
+					json_configs.mergeConfigs.each {json_var ->
+					def oneToOne = json_var.oneToOneMapping
+					def oneToManyConverted = convertOneToManyIntoOneToOneMapping(targetRepository,oneToManyMapping)
+					def manyToManyConverted = convertManyToManyIntoOneToOneMapping(sourceRepository,manyToManyMapping)
+					def allBranch = (oneToOne + " " + oneToManyConverted + " " + manyToManyConverted).replaceAll("  "," ").trim()
+					def res=performMerges(json_var.sourceRepository,json_var.targetRepository,allBranch)
+								
+					
+					}
+					
+					
+					
 					def mergeReport = []
 					
       			    // TODO use readJSON to read CONFIGS to a local variable
@@ -343,9 +358,18 @@ def performMerges(sourceRepository = '', targetRepository = '', oneToOneMapping 
 	}
 	
 	//TODO trim oneToOneMapping variable by space ' ' and assign it to a variable  
+	def trimmedMapping=oneToManyMapping.trim().split(' ')
 	def mergeReport = []	
 	
 	// TODO for each one to one mapping check if cointains ":", if so split it to get the source branch and the target branch
+	trimmedMapping.each{row->
+		if (row.contains(":")) {
+			def splitedMapping=row.split(":")
+			def sourceBranch = splitedMapping[0]
+			def targetBranch = splitedMapping[1]
+			margeReport.add(mergeBranches(sourceRepository,sourceBranch,targetRepository,targetBranch))
+			}
+	}
 	// Then call mergeBranches with the requested parameters
 	// Analyse mergeBranches
 	
