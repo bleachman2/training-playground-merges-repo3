@@ -167,9 +167,6 @@ def sendSuccessEmail(mergeReportData = '') {
 			if (array_var.getString("result")=="NONE"){
 				noneRowsHTML <<= fillDataInHTMLRow(noneRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
 			}
-			else{exit 1}
-
-
 		}
 	}
 	def emailBody = fillEmailRows(logErrors,template,errorRowTemplateSpecs, errorRowsHTML.toString())
