@@ -7,7 +7,6 @@ pipeline {
 
   	
   	options { 
-  		//TODO add option to avoid concurrent builds
 		disableConcurrentBuilds()
 	}
 
@@ -35,8 +34,7 @@ pipeline {
 				manyToManyMapping:""\
 			}\
 		]\
-		}''' //TODO create json tree object
-		
+		}'''
 		SEND_SUCCESS_EMAIL_TO = 'nb24871@novabase.pt'	
 		SEND_SUCCESS_EMAIL_SUBJECT = 'Automatic merge results report'
 		SEND_SUCCESS_EMAIL_TEMPLATE_PATH = 'email-templates/success.html' 
@@ -63,7 +61,6 @@ pipeline {
 				
 				}
       				
-					// TODO use readJSON to read CONFIGS to a local variable
 					// for each repositoryConfig object call setupRemote method with defined parameters already implemented
 					// use withCredentials to get password and user from jenkins
 					    }
@@ -86,13 +83,7 @@ pipeline {
 					
 					}
 					
-					
-					
-
-
-					
-      			    // TODO use readJSON to read CONFIGS to a local variable
-					// for each mergeConfig object assign oneToOneMapping to a variable and use convertOneToManyIntoOneToOneMapping 
+					// for each mergeConfig object assign oneToOneMapping to a variable and use convertOneToManyIntoOneToOneMapping
 					// and convertManyToManyIntoOneToOneMapping to convert the other JSON options to oneTOone, split the strings by " " like 
 					// String1 + " " + String2 + " " + convertManyToManyIntoOneToOneMapping
 					// call performMerges method with defined parameters already implemented and assign the return value to a variable like mergesPerformed
@@ -101,7 +92,6 @@ pipeline {
 					
 					
 					sh "git checkout init"
-					//TODO convert mergeReport using groovy.json.JsonOutput.toJson and write mergeReport to an json file
 					def mergeReportJson = readJSON text: groovy.json.JsonOutput.toJson(mergeReport)
 					writeJSON(file: 'mergeReport.json', json: mergeReportJson)
       			}
@@ -111,8 +101,9 @@ pipeline {
 	post { 
         success { 
   			script {
-				sh "echo hello world"
-			//TODO read mergeReport json file
+				def mergeReport =readJSON file: 'mergeReport.json'
+				sendSuccessEmail(mergeReport)
+
 			// call success email with report data
   			}
 			// clean server
@@ -120,12 +111,12 @@ pipeline {
         }
         unstable {
         	sh "git clean -d -fx . && git checkout -f init && git config --unset credential.helper"
-			//TODO call maintenance email
-           
+			sendMaintenanceEmail()
+
         }
 		failure {
 			sh "git clean -d -fx . && git checkout -f init && git config --unset credential.helper"
-		    //TODO call maintenance email
+			sendMaintenanceEmail()
 		}
     }
 }
@@ -137,11 +128,17 @@ def sendSuccessEmail(mergeReportData = '') {
 	echo mergeReportData.toString()
 	
 	//TODO read html template file for success email with ENV variable already defined SEND_SUCCESS_EMAIL_TEMPLATE_PATH
-	
+	def template =readFile(env.SEND_SUCCESS_EMAIL_TEMPLATE_PATH)
+
 	
 	//TODO define and use 3 variables errorRowTemplateSpecs, successRowTemplateSpecs, noneRowTemplateSpecs to get the placeholders ROWS
 	// use findEmailRowTemplate method with parameters
-	
+
+	def errorRowTemplateSpecs = findEmailRowTemplate(template, 'PLACEHOLDER_ERROR_ROW')
+	def successRowTemplateSpecs = findEmailRowTemplate(template, 'PLACEHOLDER_SUCCESS_ROW')
+	def noneRowTemplateSpecs = findEmailRowTemplate(template, 'PLACEHOLDER_NONE_ROW')
+
+
 	boolean logErrors = errorRowTemplateSpecs != null
 	boolean logSuccess = successRowTemplateSpecs != null
 	boolean logNone = noneRowTemplateSpecs != null
@@ -156,8 +153,32 @@ def sendSuccessEmail(mergeReportData = '') {
 	def errorRowsHTML = ""<<""
 	def successRowsHTML = ""<<""
 	def noneRowsHTML = ""<<""
-	
+
 	if (mergeReportData != null) {
+		def json_configs =readJSON text: env.CONFIGS
+
+		mergeReportData.toArray().each {array_var ->
+			if (array_var.result=="ERROR"){
+				errorRowsHTML <<= fillDataInHTMLRow(errorRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
+			}
+			if (array_var.result=="SUCCESS"){
+				successRowsHTML <<= fillDataInHTMLRow(successRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
+			}
+			if (array_var.result=="NONE"){
+				noneRowsHTML <<= fillDataInHTMLRow(noneRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
+			}
+			else{exit 1}
+
+
+		}
+		def emailBody = fillEmailRows(logErrors,template,errorRowTemplateSpecs, errorRowsHTML.toString())
+		emailBody = fillEmailRows(logSuccess, emailBody, successRowTemplateSpecs, successRowsHTML.toString())
+		emailBody = fillEmailRows(logNone, emailBody, noneRowTemplateSpecs, noneRowsHTML.toString())
+
+
+
+
+
 		//TODO read json configs
 		// for each mergeReportData.toArray() if
 		// rowData "result" = ERROR update errorRowsHTML with the result of fillDataInHTMLRow method wit correct parameters
@@ -349,11 +370,9 @@ def performMerges(sourceRepository = '', targetRepository = '', oneToOneMapping 
 		return
 	}
 	
-	//TODO trim oneToOneMapping variable by space ' ' and assign it to a variable  
 	def trimmedMapping=oneToOneMapping.trim().split(' ')
 	def mergeReport = []	
 	
-	// TODO for each one to one mapping check if cointains ":", if so split it to get the source branch and the target branch
 	trimmedMapping.each{row->
 		if (row.contains(":")) {
 			def splitedMapping=row.split(":")
