@@ -172,9 +172,11 @@ def sendSuccessEmail(mergeReportData = '') {
 	def emailBody = fillEmailRows(logErrors,template,errorRowTemplateSpecs, errorRowsHTML.toString())
 	emailBody = fillEmailRows(logSuccess, emailBody, successRowTemplateSpecs, successRowsHTML.toString())
 	emailBody = fillEmailRows(logNone, emailBody, noneRowTemplateSpecs, noneRowsHTML.toString())
-	
-	//TODO create and fill in a variable emailBody with returned values of fillEmailRows method for errorRowsHTML, successRowsHTML and noneRowsHTML
-	
+
+	writeFile file: "emailBody.html", text: emailBody
+
+	archiveArtifacts artifacts: "emailBody.html, mergeReport.json"
+
 	emailext subject: "$SEND_SUCCESS_EMAIL_SUBJECT", 
 			 to: "$SEND_SUCCESS_EMAIL_TO",
 			 body: emailBody
