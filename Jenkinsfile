@@ -171,21 +171,10 @@ def sendSuccessEmail(mergeReportData = '') {
 
 
 		}
-		def emailBody = fillEmailRows(logErrors,template,errorRowTemplateSpecs, errorRowsHTML.toString())
-		emailBody = fillEmailRows(logSuccess, emailBody, successRowTemplateSpecs, successRowsHTML.toString())
-		emailBody = fillEmailRows(logNone, emailBody, noneRowTemplateSpecs, noneRowsHTML.toString())
-
-
-
-
-
-		//TODO read json configs
-		// for each mergeReportData.toArray() if
-		// rowData "result" = ERROR update errorRowsHTML with the result of fillDataInHTMLRow method wit correct parameters
-		// rowData "result" = SUCCESS update successRowsHTML with the result of fillDataInHTMLRow method wit correct parameters
-		// rowData "result" = NONE update noneRowsHTML with the result of fillDataInHTMLRow method wit correct parameters
-		
 	}
+	def emailBody = fillEmailRows(logErrors,template,errorRowTemplateSpecs, errorRowsHTML.toString())
+	emailBody = fillEmailRows(logSuccess, emailBody, successRowTemplateSpecs, successRowsHTML.toString())
+	emailBody = fillEmailRows(logNone, emailBody, noneRowTemplateSpecs, noneRowsHTML.toString())
 	
 	//TODO create and fill in a variable emailBody with returned values of fillEmailRows method for errorRowsHTML, successRowsHTML and noneRowsHTML
 	
