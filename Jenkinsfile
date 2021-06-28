@@ -158,13 +158,13 @@ def sendSuccessEmail(mergeReportData = '') {
 		def json_configs =readJSON text: env.CONFIGS
 
 		mergeReportData.toArray().each {array_var ->
-			if (array_var.result=="ERROR"){
+			if (array_var.getString("result")=="ERROR"){
 				errorRowsHTML <<= fillDataInHTMLRow(errorRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
 			}
-			if (array_var.result=="SUCCESS"){
+			if (array_var.getString("result")=="SUCCESS"){
 				successRowsHTML <<= fillDataInHTMLRow(successRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
 			}
-			if (array_var.result=="NONE"){
+			if (array_var.getString("result")=="NONE"){
 				noneRowsHTML <<= fillDataInHTMLRow(noneRowTemplateSpecs.rowTemplate, array_var, json_configs.repositoryConfigs)
 			}
 			else{exit 1}
